@@ -1,4 +1,11 @@
-function find() { // Egzersiz A
+/**
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> }
+ */
+
+const db = require('../../data/db-config');
+
+async function find() { // Egzersiz A
   /*
     1A- Aşağıdaki SQL sorgusunu SQLite Studio'da "data/schemes.db3" ile karşılaştırarak inceleyin.
     LEFT joini Inner joine çevirirsek ne olur?
@@ -15,6 +22,13 @@ function find() { // Egzersiz A
     2A- Sorguyu kavradığınızda devam edin ve onu Knex'te oluşturun.
     Bu işlevden elde edilen veri kümesini döndürün.
   */
+  const rawData = await db('schemes as sc')
+                            .leftJoin('steps as st', 'sc.scheme_id','st.scheme_id')
+                            .select("sc.*")
+                            .count('st.step_number as number_of_steps')
+                            .groupBy('sc.scheme_id')
+                            .orderBy('sc.scheme_id','asc')
+    return rawData;
 }
 
 function findById(scheme_id) { // Egzersiz B
