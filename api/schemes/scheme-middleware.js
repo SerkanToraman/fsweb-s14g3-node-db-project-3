@@ -1,3 +1,4 @@
+const schemesModel = require('./scheme-model.js')
 /*
   Eğer `scheme_id` veritabanında yoksa:
 
@@ -6,7 +7,22 @@
     "message": "scheme_id <gerçek id> id li şema bulunamadı"
   }
 */
-const checkSchemeId = (req, res, next) => {
+const checkSchemeId = async (req, res, next) => {
+try {
+  const { scheme_id } = req.params
+  let schmeIDExist = await schemesModel.findById(scheme_id);
+  if(!schmeIDExist){
+    res.status(404).json({
+      "message": "scheme_id <gerçek id> id li şema bulunamadı"
+    })
+  }else {
+    req.schemeData = schmeIDExist;
+    next()
+  }
+}
+catch (error) {
+  next(error);
+}
 
 }
 

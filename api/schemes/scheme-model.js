@@ -31,7 +31,7 @@ async function find() { // Egzersiz A
     return rawData;
 }
 
-function findById(scheme_id) { // Egzersiz B
+async function findById(scheme_id) { // Egzersiz B
   /*
     1B- Aşağıdaki SQL sorgusunu SQLite Studio'da "data/schemes.db3" ile karşılaştırarak inceleyin:
 
@@ -43,7 +43,14 @@ function findById(scheme_id) { // Egzersiz B
           ON sc.scheme_id = st.scheme_id
       WHERE sc.scheme_id = 1
       ORDER BY st.step_number ASC;
+*/  
+    const schemeDatabyID = await db('schemes as sc')
+                            .leftJoin('steps as st','sc.scheme_id','st.scheme_id')
+                            .select("sc.scheme_name","st.*")
+                            .where('sc.scheme_id',scheme_id)
+                            .orderBy('st.step_number','asc')
 
+/*
     2B- Sorguyu kavradığınızda devam edin ve onu Knex'te oluşturun
     parametrik yapma: `1` hazır değeri yerine `scheme_id` kullanmalısınız.
 
@@ -96,7 +103,30 @@ function findById(scheme_id) { // Egzersiz B
         "scheme_name": "Have Fun!",
         "steps": []
       }
+      
   */
+      if(schemeDatabyID.length==0){
+        return null;
+      }
+      let responseScheme = {
+        scheme_id:Number(scheme_id),
+        scheme_name:schemeDatabyID[0].scheme_name,
+        steps:[]
+      }
+      if(!schemeDatabyID[0].step_id)
+        return responseData;
+
+      for (let i=0; i<schemeDatabyID.length;i++){
+        const schemeItem = schemeDatabyID[0];
+        let stepModel ={
+          step_id:schemeItem.step_id,
+          step_number:schemeItem.step_number,
+          instructions : schemeItem.instructions
+        }
+        responseScheme.steps.push(stepModel);
+      }
+
+ return responseScheme;
 }
 
 function findSteps(scheme_id) { // Egzersiz C

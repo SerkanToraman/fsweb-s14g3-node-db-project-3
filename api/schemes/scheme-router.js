@@ -1,7 +1,7 @@
 // BU DOSYAYI DEĞİŞTİRMEYİN
 const express = require('express')
 const { checkSchemeId, validateScheme, validateStep } = require('./scheme-middleware')
-const Schemes = require('./scheme-model.js')
+const schemesModel = require('./scheme-model.js');
 
 const router = express.Router()
 
@@ -24,7 +24,7 @@ const router = express.Router()
   ]
  */
 router.get('/', (req, res, next) => {
-  Schemes.find()
+  schemesModel.find()
     .then(schemes => {
       res.json(schemes)
     })
@@ -55,7 +55,7 @@ router.get('/', (req, res, next) => {
 router.get('/:scheme_id', checkSchemeId, (req, res, next) => {
   const { scheme_id } = req.params
 
-  Schemes.findById(scheme_id)
+  schemesModel.findById(scheme_id)
     .then(scheme => {
       res.json(scheme)
     })
