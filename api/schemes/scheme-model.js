@@ -48,7 +48,7 @@ async function findById(scheme_id) { // Egzersiz B
                             .leftJoin('steps as st','sc.scheme_id','st.scheme_id')
                             .select("sc.scheme_name","st.*")
                             .where('sc.scheme_id',scheme_id)
-                            .orderBy('st.step_number','asc')
+                            .orderBy('st.step_number','asc');
 
 /*
     2B- Sorguyu kavradığınızda devam edin ve onu Knex'te oluşturun
@@ -114,10 +114,19 @@ async function findById(scheme_id) { // Egzersiz B
         steps:[]
       }
       if(!schemeDatabyID[0].step_id)
-        return responseData;
+        return responseScheme;
+        //Alternatif
+          /*filteredData.forEach(item => {
+          let stepModel = {
+            step_id:item.step_id,
+            step_number:item.step_number,
+            instructions : item.instructions
+          }
+          responseData.steps.push(stepModel);
+        });*/
 
       for (let i=0; i<schemeDatabyID.length;i++){
-        const schemeItem = schemeDatabyID[0];
+        const schemeItem = schemeDatabyID[i];
         let stepModel ={
           step_id:schemeItem.step_id,
           step_number:schemeItem.step_number,
@@ -129,7 +138,7 @@ async function findById(scheme_id) { // Egzersiz B
  return responseScheme;
 }
 
-function findSteps(scheme_id) { // Egzersiz C
+async function findSteps(scheme_id) { // Egzersiz C
   /*
     1C- Knex'te aşağıdaki verileri döndüren bir sorgu oluşturun.
     Adımlar, adım_numarası'na göre sıralanmalıdır ve dizi
@@ -150,20 +159,32 @@ function findSteps(scheme_id) { // Egzersiz C
         }
       ]
   */
+      const schemeStepsDatabyID = await db('steps as st')
+                                          .leftJoin('schemes as sc','st.scheme_id','sc.scheme_id')
+                                          .select('st.step_id','st.step_number','st.instructions','sc.scheme_name')
+                                          .where('st.scheme_id',scheme_id)
+                                          .orderBy('st.step_number','asc')
+
+      return schemeStepsDatabyID;
 }
 
-function add(scheme) { // Egzersiz D
+async function add(scheme) { // Egzersiz D
   /*
     1D- Bu işlev yeni bir şema oluşturur ve _yeni oluşturulan şemaya çözümlenir.
   */
+    let [scheme_id] = await db("schemes").insert(scheme);
+    return findById(scheme_id);
 }
 
-function addStep(scheme_id, step) { // EXERCISE E
+async function addStep(scheme_id, step) { // EXERCISE E
   /*
     1E- Bu işlev, verilen 'scheme_id' ile şemaya bir adım ekler.
     ve verilen "scheme_id"ye ait _tüm adımları_ çözer,
     yeni oluşturulan dahil.
   */
+    step.scheme_id = scheme_id;
+    await db("steps").insert(step);
+    return findSteps(scheme_id);
 }
 
 module.exports = {
